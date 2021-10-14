@@ -39,12 +39,19 @@ struct ContentView: View {
     @State private var distance = 25.0
     @State private var amount: CGFloat = 1.0
     @State private var hue = 0.6
+    @State private var lineWidth = 1.0
 
     var body: some View {
         Arrow()
-            .stroke(Color(hue: hue, saturation: 1, brightness: 1), lineWidth: 1)
+            .stroke(Color(hue: hue, saturation: 1, brightness: 1), style: StrokeStyle(lineWidth: lineWidth, lineCap: .round, lineJoin: .round))
             .frame(width: 300, height: 300)
+            .animation(.easeOut(duration: 1.0))
+
+        Slider(value: $lineWidth, in: 1...10, step: 1)
+            .padding()
     }
+
+
 }
 
 struct ContentView_Previews: PreviewProvider {
