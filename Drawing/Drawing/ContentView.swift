@@ -7,48 +7,45 @@
 
 import SwiftUI
 
-struct Triangle: Shape {
-    func path(in rect: CGRect) -> Path {
-        var path = Path()
+struct ColorCyclingRectangle: View {
+    var amount = 0.0
+    var steps = 150
 
-        path.move(to: CGPoint(x: rect.midX, y: rect.minY))
-        path.addLine(to: CGPoint(x: rect.minX, y: rect.maxY))
-        path.addLine(to: CGPoint(x: rect.maxX, y: rect.maxY))
-        path.addLine(to: CGPoint(x: rect.midX, y: rect.minY))
-
-        return path
+    var body: some View {
+        ZStack {
+            ForEach(0..<steps) { value in
+                RoundedRectangle(cornerRadius: 25, style: .continuous)
+                    .inset(by: CGFloat(value))
+                    .strokeBorder(LinearGradient(gradient: Gradient(colors: [
+                        self.color(for: value, brightness: 1),
+                        self.color(for: value, brightness: 0.5)
+                    ]), startPoint: .top, endPoint: .bottom), lineWidth: 2)
+            }
+        }
+        .drawingGroup()
     }
-}
 
-struct Arrow: Shape {
+    func color(for value: Int, brightness: Double) -> Color {
+        var targetHue = Double(value) / Double(self.steps) + self.amount
 
-    func path(in rect: CGRect) -> Path {
-        var path = Path()
+        if targetHue > 1 {
+            targetHue -= 1
+        }
 
-        path.move(to: CGPoint(x: rect.minX, y: rect.minY))
-        path.addPath(Triangle().path(in: CGRect(x: rect.maxX / 4, y: rect.minY, width: rect.width / 2, height: rect.height / 3)))
-        path.addRect(CGRect(x: rect.maxX / 4 + rect.width / 8, y:rect.height / 3, width: rect.width / 4, height: rect.height / 2))
-
-        return path
+        return Color(hue: targetHue, saturation: 1, brightness: brightness)
     }
 }
 
 struct ContentView: View {
-    @State private var innerRadius = 125.0
-    @State private var outerRadius = 75.0
-    @State private var distance = 25.0
-    @State private var amount: CGFloat = 1.0
-    @State private var hue = 0.6
-    @State private var lineWidth = 1.0
+    @State private var colorCycle = 0.0
 
     var body: some View {
-        Arrow()
-            .stroke(Color(hue: hue, saturation: 1, brightness: 1), style: StrokeStyle(lineWidth: lineWidth, lineCap: .round, lineJoin: .round))
-            .frame(width: 300, height: 300)
-            .animation(.easeOut(duration: 1.0))
+        VStack {
+            ColorCyclingRectangle(amount: colorCycle)
+                .frame(width: 300, height: 300)
 
-        Slider(value: $lineWidth, in: 1...10, step: 1)
-            .padding()
+            Slider(value: $colorCycle)
+        }
     }
 
 
